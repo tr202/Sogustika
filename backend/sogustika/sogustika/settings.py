@@ -6,15 +6,13 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-55f92+#quimbktqbh(pf2*t3x1*swz5_8ety_kpc0c5yc)8&k^'
+SECRET_KEY = config('SECRET_KEY')
 
-DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost')
 
 
 AUTH_USER_MODEL = 'users.AppUser'
