@@ -1,3 +1,5 @@
+*.copy.py
+* copy.py
 static/
 media/
 collected_static/

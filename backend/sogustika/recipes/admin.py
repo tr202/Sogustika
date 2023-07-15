@@ -7,7 +7,6 @@ from recipes.models import (MeasurementUnit,
                             Recipe,
                             RecipeIngredient,
                             FavoriteRecipe,
-                            FavoriteUser,
                             ShoppingCart)
 
 
@@ -64,11 +63,6 @@ class TagRecipeAdmin(admin.ModelAdmin):
 
 @admin.register(FavoriteRecipe)
 class FavoriteRecipeAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(FavoriteUser)
-class FavoriteUser(admin.ModelAdmin):
     pass
 
 
