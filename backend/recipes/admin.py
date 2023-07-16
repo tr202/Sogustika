@@ -17,20 +17,21 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 
 @admin.register(MeasurementUnit)
 class MeasurementUnitAdmin(admin.ModelAdmin):
-    list_display = ('id','unit',)
+    list_display = ('id', 'unit',)
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'get_measurement_unit')
+
     def get_measurement_unit(self, ingredient):
         return ingredient.measurement_unit.unit
-    
+
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     pass
-    #list_display = ('__all__',)
+
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
@@ -42,12 +43,13 @@ class RecipeAdmin(admin.ModelAdmin):
                     'cooking_time',
                     'pub_date',
                     'get_tags',)
-    
+
     list_filter = ('name', 'author', 'tags',)
+
     def get_favorited_count(self, recipe):
         return FavoriteRecipe.objects.filter(recipe=recipe).count()
     get_favorited_count.__name__ = 'добавлен в избранное'
-    
+
     def get_tags(self, recipe):
         recipe_tags = recipe.tags.all()
         print(recipe_tags)
@@ -55,6 +57,7 @@ class RecipeAdmin(admin.ModelAdmin):
         print(tags)
         return tags
     get_tags.__name__ = 'теги'
+
 
 @admin.register(TagRecipe)
 class TagRecipeAdmin(admin.ModelAdmin):

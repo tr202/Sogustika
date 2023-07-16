@@ -1,11 +1,10 @@
-import os
+# flake8: noqa
 from decouple import config
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY', default='Secret-key')
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 
@@ -39,6 +38,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 ROOT_URLCONF = 'sogustika.urls'
 
 TEMPLATES = [
@@ -60,9 +61,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'sogustika.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -70,9 +68,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 '''
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -90,9 +85,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 '''
 
-# Internationalization
-# https://docs.djangoproject.com/en/3.2/topics/i18n/
-
 LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'Europe/Moscow'
@@ -104,23 +96,17 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'collected_static'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/var/www/foodgram-project-react/media'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        #'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.AllowAny', 
+        'rest_framework.permissions.IsAuthenticated',
+        #'rest_framework.permissions.AllowAny', 
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -130,6 +116,7 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': 'api/users/password/reset/confirm/{uid}/{token}',
     'DEFAULT_USER_SERIALIZER_FIELDS': (
         'email',
         'id',
