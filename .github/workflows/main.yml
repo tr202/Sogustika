@@ -65,8 +65,9 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        source: "infra/*"
-        target: "sogustika"
+        source: "infra/docker-compose.production.yml,nginx.conf"
+        target: sogustika
+        strip_components: 1
     - name: Executing remote ssh commands to deploy
       uses: appleboy/ssh-action@master
       with:
