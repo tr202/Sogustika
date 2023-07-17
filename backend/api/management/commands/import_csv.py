@@ -3,6 +3,8 @@ from django.core.management import BaseCommand
 
 from .load_csv_data import Command as sqlite
 from .load_data import Command as postgres
+
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
         if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
