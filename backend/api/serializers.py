@@ -1,6 +1,5 @@
 import base64
 import os
-import pathlib
 
 from django.core.files.base import ContentFile
 
@@ -26,6 +25,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         queryset=MeasurementUnit.objects.all(),
         slug_field='unit'
     )
+
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit',)
@@ -78,8 +78,6 @@ class AppUserSerializer(serializers.ModelSerializer):
                   'last_name',
                   'is_subscribed',)
 
-amount_external = {'amount': None}
-
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()
@@ -90,20 +88,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     is_in_shopping_cart = serializers.SerializerMethodField()
 
     def get_ingredients(self, obj):
-        ins = {'q1':obj.ingredients,'q2':obj.recipe_ingredient}
         serializer = RecipeIngredientSerializer(many=True, required=False)
-        #serializer = IngredientSerializer(many=True, required=False)
-        # obj.ingredients.add(obj.recipe_ingredient)
-        # ins = {'q1':obj.ingredients,'q2':obj.recipe_ingredient}
-        # serializer = RecipeIngredientSerializer(many=True, required=False,)
-        #serializer.data_amount(obj.recipe_ingredient)
-        #amount_external['amount']=obj.recipe_ingredient
-        #print(obj)
-        #print(obj.ingredients)
-        #print(amount_external.get('amount'), 'in_recipe')
-        #obj.ins = obj.recipe_ingredient
-        #serializer.get_extra_kwargs(obj.recipe_ingredient)
-        
         return serializer.to_representation(obj.recipe_ingredient)
 
     def get_author(self, obj):
@@ -214,49 +199,6 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         except Exception:
             ...
         recipe.save()
-        
-        
-        
-        '''
-        if 'image' in validated_data.keys():
-            image = validated_data.pop('image')
-            del_image_path = recipe.image.path
-            try:
-                os.remove(del_image.path)
-            except Exception:
-                print('no_file')
-        else:
-            image = Recipe.objects.get(id=id).image
-        print(image)
-        '''
-       
-        #recipe = Recipe.objects.get(id=id)
-        #Recipe.objects.filter(id=id).delete()
-        '''
-        try:
-            recipe = Recipe.objects.create(
-                **validated_data,
-                author=self.context.get('request').user,
-                image=image,
-                #id=id
-            )
-        except Exception:
-            recipe = Recipe.objects.create(
-                **validated_data,
-                author=self.context.get('request').user,
-                image=image,
-            )
-            
-        for tag in tags:
-            TagRecipe.objects.create(tag=tag, recipe=recipe)
-        for ingredient in ingredients:
-            amount = ingredient.get('amount')
-            RecipeIngredient.objects.create(
-                ingredient=ingredient.get('ingredient'),
-                amount=amount,
-                recipe=recipe
-            )
-        '''
         return recipe
 
     def create(self, validated_data, instance=None):

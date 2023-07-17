@@ -1,5 +1,3 @@
-import os
-from typing import Any, Dict, Tuple
 from django.db import models
 from django.core.exceptions import ValidationError
 
@@ -90,9 +88,7 @@ class Recipe(models.Model):
                               default=None,)
     text = models.TextField(null=False,)
     cooking_time = models.SmallIntegerField()
-    def delete(self, using: Any = ..., keep_parents: bool = ...):
-        
-        return super().delete(using, keep_parents)
+
     class Meta:
         verbose_name_plural = 'рецепты'
         verbose_name = 'рецепт'
