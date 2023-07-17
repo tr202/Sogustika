@@ -66,7 +66,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         source: "infra/docker-compose.production.yml,infra/nginx.conf"
-        target: "kittygram"
+        target: "sogustika"
     - name: Executing remote ssh commands to deploy
       uses: appleboy/ssh-action@master
       with:
@@ -75,7 +75,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         script: |
-          cd kittygram
+          cd sogustika
           # Выполняет pull образов с Docker Hub
           sudo docker compose -f docker-compose.production.yml pull
           # Перезапускает все контейнеры в Docker Compose
