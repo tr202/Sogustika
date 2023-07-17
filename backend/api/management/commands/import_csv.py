@@ -13,3 +13,7 @@ class Command(BaseCommand):
             postgres.handle(self, *args, **options)
         else:
             raise Exception('Unknown database')
+
+
+if __name__ == '__main__':
+    Command().handle()
