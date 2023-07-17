@@ -1,3 +1,6 @@
+*temp-copy*
+*copy.yml
+backup/
 *.copy.py
 * copy.py
 static/
