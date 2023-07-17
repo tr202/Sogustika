@@ -15,22 +15,19 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-    comm = sys.argv
-    if 'import_csv' in sys.argv:
-        comm = ['manage.py']
-    print('comm', sys.argv)
-    execute_from_command_line(comm)
-    if 'import_csv' in sys.argv:
-        try:
-            from api.management.commands.load_csv_data import Command as sqlite
-            sqlite().handle()
-        except Exception as e:
-            print('sqlite fail', e)
-        try:
-            from api.management.commands.load_data import Command as postgres
-            postgres().handle()
-        except Exception as e:
-            print('postgres fail', e)    
+    
+    execute_from_command_line(sys.argv)
+    
+    try:
+        from api.management.commands.load_csv_data import Command as sqlite
+        sqlite().handle()
+    except Exception as e:
+        print('sqlite fail', e)
+    try:
+        from api.management.commands.load_data import Command as postgres
+        postgres().handle()
+    except Exception as e:
+        print('postgres fail', e)    
     
 
 
