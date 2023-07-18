@@ -19,5 +19,6 @@ Sogustika социальная сеть гурманов.
 ## CI/CD
 - Github Actions
 
+
 ## Production
 Kostya https://github.com/tr202
