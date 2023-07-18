@@ -65,7 +65,7 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        source: "infra/docker-compose.production.yml,nginx.conf"
+        source: "infra/docker-compose.production.yml,infra/nginx.conf,data/ingredients1.csv"
         target: sogustika
         strip_components: 1
     - name: Executing remote ssh commands to deploy
@@ -85,4 +85,5 @@ jobs:
           # Выполняет миграции и сбор статики
           sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
           sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
-          sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+          sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /static/
+          sudo docker compose -f docker-compose.production.yml exec backend python manage.py load_data

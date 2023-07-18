@@ -18,12 +18,12 @@ class Command(BaseCommand):
         database_name = settings.DATABASES['default']['NAME']
         host = settings.DATABASES['default']['HOST']
         port = settings.DATABASES['default']['PORT']
-        url_struct = 'postgresql://{user}:{password}@{host}:{port}/{database_name}'
-        database_url = url_struct.format(user=user,
-                                         password=password,
-                                         host=host,
-                                         port=port,
-                                         database_name=database_name,)
+        struct = 'postgresql://{user}:{password}@{host}:{port}/{database_name}'
+        database_url = struct.format(user=user,
+                                     password=password,
+                                     host=host,
+                                     port=port,
+                                     database_name=database_name,)
 
         engine = create_engine(database_url, echo=False)
 
@@ -32,7 +32,7 @@ class Command(BaseCommand):
     def handle_1(self, engine, pd):
         try:
             df = pd.read_csv(
-                '/home/marid/Dev/foodgram-project-react/data/ingredients1.csv',
+                'ingredients1.csv',
                 usecols=[1]
             )
             df.drop_duplicates(keep='first', inplace=True)
@@ -46,7 +46,7 @@ class Command(BaseCommand):
             qs = MeasurementUnit.objects.values_list('id', 'unit')
             res = dict((v, k) for k, v in dict(qs).items())
             df = pd.read_csv(
-                '/home/marid/Dev/foodgram-project-react/data/ingredients1.csv'
+                'ingredients1.csv'
             )
             df['measurement_unit_id'] = df['unit'].map(res)
             df = df.drop('unit', axis=1)

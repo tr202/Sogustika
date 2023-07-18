@@ -1,6 +1,5 @@
 # flake8: noqa
-import os
-from decouple import config, Csv
+from decouple import config
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -9,7 +8,8 @@ SECRET_KEY = config('SECRET_KEY', default='Secret-key')
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default=[], cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
+
 
 AUTH_USER_MODEL = 'users.AppUser'
 
@@ -71,13 +71,13 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('POSTGRES_DB', 'django'),
-            'USER': os.getenv('POSTGRES_USER', 'django'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-            'HOST': os.getenv('DB_HOST', ''),
-            'PORT': os.getenv('DB_PORT', 5432)
+            'NAME': config('POSTGRES_DB', default='django'),
+            'USER': config('POSTGRES_USER', default='django'),
+            'PASSWORD': config('POSTGRES_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default=''),
+            'PORT': config('DB_PORT', default=5432)
         }
-    }
+}
 
 
 '''
@@ -111,7 +111,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'collected_static'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/foodgram-project-react/media'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

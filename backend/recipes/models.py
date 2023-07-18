@@ -73,9 +73,7 @@ class Recipe(models.Model):
                                   through='TagRecipe',
                                   related_name='recipe_tag',)
     author = models.ForeignKey(AppUser,
-                               on_delete=models.SET_DEFAULT,
-                               default=AppUser.objects.get(
-                                   username='sogustika').pk,
+                               on_delete=models.DO_NOTHING,
                                null=False,
                                related_name='recipes',)
 
