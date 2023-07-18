@@ -37,9 +37,9 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./certbot/www:/var/www/certbot/:ro
   certbot:
-    image: certbot/cerbot:latest
+    image: certbot/cerbot
     volumes:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
-      
+
       
