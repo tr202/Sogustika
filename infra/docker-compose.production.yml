@@ -16,9 +16,12 @@ services:
     image: tr202/sogustika_backend
     env_file: .env
     volumes:
-      - ./ingredients1.csv:/app/data
       - static_volume:/static
       - media_volume:/app/media
+      - type: bind
+        source: ./data
+        target: /app/data
+        read_only: true
   frontend:
     image: tr202/sogustika_frontend
     command: cp -r /app/build/. /static/
