@@ -36,8 +36,11 @@ class TagViewSet(viewsets.ModelViewSet):
 
 class IngredientFilter(filters.SearchFilter):
     def filter_queryset(self, request, queryset, view):
-        search_param = request.GET.get('name')
-        queryset = queryset.filter(name__startswith=search_param)
+        search_param = request.GET.get('name').lower()
+        q_startwith = queryset.filter(name__startswith=search_param)
+        queryset = queryset.annotate(
+            start=Exists(q_startwith)).filter(
+                name__icontains=search_param).order_by('start')
         return queryset
 
 
