@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from django.conf import settings
 from django.core.management import BaseCommand
 
-from recipes.models import MeasurementUnit
+from recipes.models import MeasurementUnit, Ingredient
 
 
 class Command(BaseCommand):
@@ -43,6 +43,7 @@ class Command(BaseCommand):
         except Exception as e:
             print('units', e)
         try:
+            Ingredient.objects.all().delete()
             qs = MeasurementUnit.objects.values_list('id', 'unit')
             res = dict((v, k) for k, v in dict(qs).items())
             df = pd.read_csv(

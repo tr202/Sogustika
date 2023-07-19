@@ -19,7 +19,7 @@ class MeasurementUnit(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=100, unique=False, blank=False)
+    name = models.CharField(max_length=100, unique=True, blank=False)
     measurement_unit = models.ForeignKey(
         MeasurementUnit,
         null=True,

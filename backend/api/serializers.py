@@ -181,6 +181,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         recipe = Recipe.objects.get(id=id)
         del_image_path = recipe.image.path
         recipe.author = self.context.get('request').user
+        recipe.name = validated_data.pop('name')
+        recipe.text = validated_data.pop('text')
+        recipe.cooking_time = validated_data.pop('cooking_time')
         RecipeIngredient.objects.filter(recipe__id=id).delete()
         TagRecipe.objects.filter(recipe__id=id).delete()
         for tag in tags:
