@@ -22,3 +22,9 @@ Sogustika социальная сеть гурманов.
 
 ## Production
 Kostya https://github.com/tr202
+
+https://sogustika.ddns.net
+
+admin@admin.admin
+123
+
