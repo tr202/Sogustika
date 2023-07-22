@@ -2,11 +2,11 @@ from django.db.models import Exists, OuterRef, Sum, Value
 from django.http import FileResponse
 
 from rest_framework import filters, viewsets, status
-from rest_framework import pagination
 from rest_framework import permissions as drf_permission
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from api.pagination import RecipePagination
 from api.serializers import (IngredientSerializer,
                              FavoriteRecipeSerializer,
                              RecipeCreateUpdateSerializer,
@@ -53,12 +53,6 @@ class IngredientViewSet(viewsets.ModelViewSet):
     search_fields = ('name',)
 
 
-class RecipePagination(pagination.PageNumberPagination):
-    page_size = 5
-    page_size_query_param = 'limit'
-    max_page_size = 100
-
-
 class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = RecipePagination
     permission_classes = (drf_permission.AllowAny,)
@@ -91,10 +85,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).select_related(
             'author'
         ).prefetch_related(
-            'recipe_ingredient'
-        ).prefetch_related(
-            'tags'
-        ).prefetch_related(
+            'recipe_ingredient',
+            'tags',
             'ingredients'
         )
         request_dict = dict(self.request.GET)
@@ -141,15 +133,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         queryset = filter_tags(queryset)
         queryset = filter_user(queryset)
         return queryset
-
+    
     def get_serializer_class(self):
         if self.action in ('update',
                            'create',
                            'partial_update',
                            ) and self.request.user.is_authenticated:
             return RecipeCreateUpdateSerializer
-        else:
-            return RecipeSerializer
+        return RecipeSerializer
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
