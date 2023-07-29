@@ -1,11 +1,8 @@
 from django.contrib.auth import authenticate
-
-from rest_framework import serializers
-
 from djoser.conf import settings
 from djoser.serializers import TokenCreateSerializer, UserSerializer
-
 from recipes.models import Recipe
+from rest_framework import serializers
 from users.models import AppUser
 
 

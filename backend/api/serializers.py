@@ -1,33 +1,29 @@
 import base64
 
-from django.db import transaction
 from django.core.files.base import ContentFile
-
+from django.db import transaction
+from recipes.models import (Ingredient, MeasurementUnit, Recipe,
+                            RecipeIngredient, Tag)
 from rest_framework import serializers
-from recipes.models import (Ingredient,
-                            MeasurementUnit,
-                            RecipeIngredient,
-                            Recipe,
-                            Tag,)
 from users.models import AppUser
 
 
 class TagSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         return data
-    
+
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug',)
         read_only_fields = ('name', 'color', 'slug',)
-        
+
 
 class IngredientSerializer(serializers.ModelSerializer):
     measurement_unit = serializers.SlugRelatedField(
         queryset=MeasurementUnit.objects.all(),
         slug_field='unit'
     )
-    
+
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit',)
@@ -41,7 +37,7 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
 class AppUserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.BooleanField()
-   
+
     class Meta:
         model = AppUser
         fields = ('email',
@@ -57,11 +53,12 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='ingredient_id')
     name = serializers.CharField()
     measurement_unit = serializers.CharField()
+
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'name', 'measurement_unit', 'amount',)
 
-        
+
 class RecipeSerializer(serializers.ModelSerializer):
     author = AppUserSerializer()
     image = serializers.ImageField()
@@ -72,6 +69,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True,)
     is_favorited = serializers.BooleanField()
     is_in_shopping_cart = serializers.BooleanField()
+
     class Meta:
         model = Recipe
         fields = ('id',
@@ -103,7 +101,8 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeIngredient
-        fields =  ('id', 'amount',)
+        fields = ('id', 'amount',)
+
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     image = Base64ImageField(allow_null=False, required=True)
@@ -116,7 +115,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                              amount=ingredient.get('amount'),
                              recipe=instance) for ingredient in ingredients)
 
-    @transaction.atomic    
+    @transaction.atomic
     def update(self, instance, validated_data):
         instance.tags.clear()
         instance.ingredients.clear()
@@ -126,7 +125,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         print(ingredients)
         self.set_ingredients(ingredients, instance)
         return super().update(instance, validated_data)
-    
+
     @transaction.atomic
     def create(self, validated_data):
         tags = validated_data.pop('tags')
@@ -134,11 +133,10 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         instance = Recipe.objects.create(
             **validated_data,
             author=self.context.get('request').user,
-            )
+        )
         instance.tags.set(tags)
         self.set_ingredients(ingredients, instance)
         return instance
-
 
     class Meta:
         model = Recipe
@@ -149,4 +147,3 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                   'text',
                   'image',
                   'ingredients',)
-        

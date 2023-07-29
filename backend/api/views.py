@@ -1,32 +1,23 @@
+from api.pagination import RecipePagination
+from api.serializers import (FavoriteRecipeSerializer, IngredientSerializer,
+                             RecipeCreateUpdateSerializer, RecipeSerializer,
+                             TagSerializer)
+from api.utils import get_pdf
 from django.contrib.auth import get_user_model
-from django.db.models import Exists, OuterRef,Prefetch, Sum, Value
+from django.db.models import Exists, OuterRef, Prefetch, Sum, Value
 from django.http import FileResponse
-
-from rest_framework import filters, viewsets, status
+from django_filters import rest_framework as dj_filters
+from recipes.models import (FavoriteRecipe, Ingredient, MeasurementUnit,
+                            Recipe, RecipeIngredient, ShoppingCart, Tag)
+from rest_framework import filters
 from rest_framework import permissions as drf_permission
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
-from django_filters import rest_framework as dj_filters
-
-from api.pagination import RecipePagination
-from api.serializers import (IngredientSerializer,
-                             FavoriteRecipeSerializer,
-                             RecipeCreateUpdateSerializer,
-                             RecipeSerializer,
-                             TagSerializer,)
-from api.utils import get_pdf
-from recipes.models import (FavoriteRecipe,
-                            Ingredient,
-                            MeasurementUnit,
-                            Recipe,
-                            RecipeIngredient,
-                            ShoppingCart,
-                            Tag,
-                            TagRecipe,)
 from users.models import FavoriteUser
 
 AppUser = get_user_model()
+
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
@@ -49,27 +40,30 @@ class IngredientViewSet(viewsets.ModelViewSet):
     filter_backends = (IngredientFilter,)
     search_fields = ('name',)
 
+
 class RecipeFilterSet(dj_filters.FilterSet):
     tags = dj_filters.AllValuesMultipleFilter(field_name='tags__slug')
     is_favorited = dj_filters.BooleanFilter(method='get_is_favorited')
-    is_in_shopping_cart = dj_filters.BooleanFilter(method='get_is_in_shopping_cart')
-    
+    is_in_shopping_cart = dj_filters.BooleanFilter(
+        method='get_is_in_shopping_cart')
+
     def get_is_in_shopping_cart(self, queryset, name, value):
         return queryset.filter(is_in_shopping_cart=True) if value else queryset
-        
+
     def get_is_favorited(self, queryset, name, value):
         return queryset.filter(is_favorited=True) if value else queryset
-    
+
     class Meta:
         model = Recipe
         fields = ('author',)
+
 
 class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = RecipePagination
     permission_classes = (drf_permission.AllowAny,)
     filter_backends = (dj_filters.DjangoFilterBackend,)
     filterset_class = RecipeFilterSet
-    
+
     def get_queryset(self):
         if self.action in ('update',
                            'create',
@@ -79,14 +73,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         queryset = Recipe.objects.all()
         subquery_name = Ingredient.objects.filter(id=OuterRef('ingredient_id'))
         subquery_unit = Ingredient.objects.filter(
-            id=OuterRef(OuterRef('ingredient_id'))).values('measurement_unit_id')[:1]
+            id=OuterRef(
+                OuterRef('ingredient_id'))).values('measurement_unit_id')[:1]
         queryset = queryset.prefetch_related(
             Prefetch(
-            'recipe_ingredient',
-            RecipeIngredient.objects.annotate(
-                name=subquery_name.values('name'),
-                measurement_unit=MeasurementUnit.objects.filter(
-                    id=subquery_unit).values('unit'))))
+                'recipe_ingredient',
+                RecipeIngredient.objects.annotate(
+                    name=subquery_name.values('name'),
+                    measurement_unit=MeasurementUnit.objects.filter(
+                        id=subquery_unit).values('unit'))))
         user = self.request.user
         if user.is_authenticated:
             return queryset.annotate(
@@ -103,8 +98,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     'author', AppUser.objects.annotate(
                         is_subscribed=Exists(
                             FavoriteUser.objects.filter(
-                            user_id=OuterRef('pk'),
-                            subscriber=user)))),
+                                user_id=OuterRef('pk'),
+                                subscriber=user)))),
                     'tags',
                     'ingredients')
         return queryset.annotate(
