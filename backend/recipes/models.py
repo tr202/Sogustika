@@ -62,6 +62,7 @@ class Tag(models.Model):
         verbose_name_plural = 'Теги'
         verbose_name = 'тег'
         ordering = ('name',)
+        default_related_name = 'tags'
 
     def __str__(self):
         return self.name
@@ -71,7 +72,7 @@ class Recipe(models.Model):
     pub_date = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag,
                                   through='TagRecipe',
-                                  related_name='recipe_tag',)
+                                  related_name='tags',)
     author = models.ForeignKey(AppUser,
                                on_delete=models.DO_NOTHING,
                                null=False,
