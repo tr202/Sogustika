@@ -1,12 +1,8 @@
-import os
-from sqlalchemy import create_engine
-
+from decouple import config
 from django.conf import settings
 from django.core.management import BaseCommand
-
-from decouple import config
-
-from recipes.models import MeasurementUnit, Ingredient
+from recipes.models import Ingredient, MeasurementUnit
+from sqlalchemy import create_engine
 
 
 class Command(BaseCommand):
@@ -36,7 +32,7 @@ class Command(BaseCommand):
         try:
             df = pd.read_csv(
                 config('PATH_TO_CSV'),
-                #settings.BASE_DIR / 'data/ingredients1.csv',
+                # settings.BASE_DIR / 'data/ingredients1.csv',
                 usecols=[1]
             )
             df.drop_duplicates(keep='first', inplace=True)
@@ -52,7 +48,7 @@ class Command(BaseCommand):
             res = dict((v, k) for k, v in dict(qs).items())
             df = pd.read_csv(
                 config('PATH_TO_CSV'),
-                #settings.BASE_DIR / 'data/ingredients1.csv'
+                # settings.BASE_DIR / 'data/ingredients1.csv'
             )
             df['measurement_unit_id'] = df['unit'].map(res)
             df = df.drop('unit', axis=1)

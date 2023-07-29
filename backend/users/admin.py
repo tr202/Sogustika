@@ -1,9 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import Group
-
 from rest_framework.authtoken.models import TokenProxy
-
 from users.models import AppUser, FavoriteUser
 
 if not settings.DEBUG:
