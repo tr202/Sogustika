@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
     'djoser',
+    'django_filters',
     'users',
     'api',
     'recipes',
@@ -147,7 +148,6 @@ DJOSER = {
         'token_create': 'users.serializers.AppTokenCreateSerializer',
     },
 }
-
 '''
 LOGGING = {
     'version': 1,

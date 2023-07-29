@@ -1,5 +1,4 @@
 import base64
-import os
 
 from django.db import transaction
 from django.core.files.base import ContentFile
@@ -9,14 +8,14 @@ from recipes.models import (Ingredient,
                             MeasurementUnit,
                             RecipeIngredient,
                             Recipe,
-                            Tag,
-                            TagRecipe)
+                            Tag,)
 from users.models import AppUser
 
 
 class TagSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         return data
+    
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug',)
@@ -24,7 +23,6 @@ class TagSerializer(serializers.ModelSerializer):
         
 
 class IngredientSerializer(serializers.ModelSerializer):
-
     measurement_unit = serializers.SlugRelatedField(
         queryset=MeasurementUnit.objects.all(),
         slug_field='unit'
@@ -41,37 +39,9 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time',)
 
 
-class RecipeIngredientSerializer(serializers.ModelSerializer):
-    id = serializers.SerializerMethodField()
-    name = serializers.SerializerMethodField()
-    measurement_unit = serializers.SerializerMethodField()
-    amount = serializers.SerializerMethodField()
-
-    def get_id(self, obj):
-        return obj.ingredient.id
-
-    def get_name(self, obj):
-        return obj.ingredient.name
-
-    def get_measurement_unit(self, obj):
-        return obj.ingredient.measurement_unit.unit
-
-    def get_amount(self, obj):
-        if obj.ingredient.measurement_unit.counted:
-            return obj.amount
-        else:
-            return ''
-
-    class Meta:
-        model = RecipeIngredient
-        fields = ('id', 'name', 'measurement_unit', 'amount',)
-
 class AppUserSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField(read_only=True)
-
-    def get_is_subscribed(self, obj):
-        return obj.is_subscribed
-
+    is_subscribed = serializers.BooleanField()
+   
     class Meta:
         model = AppUser
         fields = ('email',
@@ -79,33 +49,29 @@ class AppUserSerializer(serializers.ModelSerializer):
                   'username',
                   'first_name',
                   'last_name',
-                  'is_subscribed',)
+                  'is_subscribed',
+                  )
 
 
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='ingredient_id')
+    name = serializers.CharField()
+    measurement_unit = serializers.CharField()
+    class Meta:
+        model = RecipeIngredient
+        fields = ('id', 'name', 'measurement_unit', 'amount',)
+
+        
 class RecipeSerializer(serializers.ModelSerializer):
-    author = serializers.SerializerMethodField()
+    author = AppUserSerializer()
     image = serializers.ImageField()
-    ingredients = serializers.SerializerMethodField()
-    #ingredients = RecipeIngredientSerializer(many=True, source='recipe_ingredient')
+    ingredients = RecipeIngredientSerializer(
+        source='recipe_ingredient',
+        many=True
+    )
     tags = TagSerializer(many=True,)
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
-
-    def get_ingredients(self, obj):
-        serializer = RecipeIngredientSerializer(many=True, required=False)
-        return serializer.to_representation(obj.recipe_ingredient)
-
-    def get_author(self, obj):
-        serialiser = AppUserSerializer()
-        obj.author.is_subscribed = obj.is_subscribed
-        return serialiser.to_representation(obj.author)
-
-    def get_is_in_shopping_cart(self, obj):
-        return obj.is_in_shopping_cart
-
-    def get_is_favorited(self, obj):
-        return obj.is_favorited
-
+    is_favorited = serializers.BooleanField()
+    is_in_shopping_cart = serializers.BooleanField()
     class Meta:
         model = Recipe
         fields = ('id',
@@ -121,7 +87,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                   )
         read_only_fields = ('__all__',)
 
-##############################################################################
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
@@ -138,7 +103,7 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeIngredient
-        fields = ('id','ingredient_id', 'amount',)
+        fields = fields = fields = ('id', 'amount',)
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     image = Base64ImageField(allow_null=False, required=True)
@@ -158,6 +123,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         instance.tags.set(tags)
+        print(ingredients)
         self.set_ingredients(ingredients, instance)
         return super().update(instance, validated_data)
     

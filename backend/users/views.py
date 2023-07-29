@@ -1,21 +1,15 @@
 from django.db.models import Count, Exists, OuterRef, Value
 
-from rest_framework import viewsets, status
-from rest_framework import permissions as drf_permission
-from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.response import Response
-
 from djoser.views import UserViewSet
 
+from rest_framework import permissions as drf_permission
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from users.models import AppUser, FavoriteUser
+from users.pagination import UsersPagination
 from users.serializers import AppUserSerializer, SubscriptionsSerializer
-
-
-class UsersPagination(PageNumberPagination):
-    page_size = 5
-    page_size_query_param = 'limit'
-    max_page_size = 100
 
 
 class AppUserViewSet(UserViewSet):
