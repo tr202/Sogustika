@@ -51,6 +51,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         queryset = Recipe.objects.select_related(
             'author',
         ).prefetch_related(
+            'ingredients',
             'tags',
             'recipe_ingredients__ingredient',
             'ingredients__measurement_unit',
