@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from recipes.utils import slugify
-from users.models import User
 
 User = get_user_model()
 
