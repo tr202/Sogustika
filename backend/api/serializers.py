@@ -122,7 +122,7 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     image = Base64ImageField(allow_null=False, required=True)
-    tags = TagSerializer(many=True, )
+    tags = TagSerializer(many=True)
     ingredients = RecipeIngredientsSerializer(many=True)
 
     def set_ingredients(self, ingredients, instance):
