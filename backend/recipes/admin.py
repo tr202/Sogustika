@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from recipes.models import (FavoriteRecipe, Ingredient, MeasurementUnit,
                             Recipe, RecipeIngredient, ShoppingCart, Tag,
                             TagRecipe)
@@ -46,9 +47,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def get_tags(self, recipe):
         recipe_tags = recipe.tags.all()
-        print(recipe_tags)
         tags = tuple(map(lambda x: x.name, recipe_tags))
-        print(tags)
         return tags
     get_tags.__name__ = 'теги'
 
