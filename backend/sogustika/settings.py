@@ -11,7 +11,12 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
 
 
-AUTH_USER_MODEL = 'users.AppUser'
+AUTH_USER_MODEL = 'users.User'
+
+POSTS_ON_PAGE = 10
+PAGE_SIZE_QUERY_PARAM = 'limit'
+MAX_PAGE_SIZE = 100
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -61,23 +66,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sogustika.wsgi.application'
 
-if False:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_DB', default='django'),
+        'USER': config('POSTGRES_USER', default='django'),
+        'PASSWORD': config('POSTGRES_PASSWORD', default=''),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default=5432)
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('POSTGRES_DB', default='django'),
-            'USER': config('POSTGRES_USER', default='django'),
-            'PASSWORD': config('POSTGRES_PASSWORD', default=''),
-            'HOST': config('DB_HOST', default=''),
-            'PORT': config('DB_PORT', default=5432)
-        }
 }
 
 
@@ -117,6 +115,7 @@ MEDIA_ROOT = config('MEDIA_ROOT') #BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    'SEARCH_PARAM': 'name',
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
         #'rest_framework.permissions.AllowAny', 
@@ -130,13 +129,6 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'api/users/password/reset/confirm/{uid}/{token}',
-    'DEFAULT_USER_SERIALIZER_FIELDS': (
-        'email',
-        'id',
-        'username',
-        'first_name',
-        'last_name',
-        ),
     'PERMISSIONS': {
         'user_list': ['rest_framework.permissions.IsAuthenticated'],
         'user': ['rest_framework.permissions.AllowAny']
@@ -144,8 +136,8 @@ DJOSER = {
     'HIDE_USERS': False,
     'APP_LOGIN_FIELD': 'email',
     'SERIALIZERS': {
-        'user': 'users.serializers.AppUserSerializer',
-        'token_create': 'users.serializers.AppTokenCreateSerializer',
+        'user': 'api.serializers.UserSerializer',
+        'token_create': 'api.serializers.AppTokenCreateSerializer',
     },
 }
 '''

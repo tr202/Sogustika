@@ -1,8 +1,10 @@
 from decouple import config
+from sqlalchemy import create_engine
+
 from django.conf import settings
 from django.core.management import BaseCommand
+
 from recipes.models import Ingredient, MeasurementUnit
-from sqlalchemy import create_engine
 
 
 class Command(BaseCommand):
@@ -35,6 +37,7 @@ class Command(BaseCommand):
                 # settings.BASE_DIR / 'data/ingredients1.csv',
                 usecols=[1]
             )
+            MeasurementUnit.objects.all().delete()
             df.drop_duplicates(keep='first', inplace=True)
             df = df.assign(counted=True)
             df.to_sql('recipes_measurementunit',

@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class AppUser(AbstractUser):
+class User(AbstractUser):
     email = models.EmailField(unique=True,
                               verbose_name='Адрес электронной почты',)
     first_name = models.CharField(max_length=50,
@@ -17,11 +17,11 @@ class AppUser(AbstractUser):
         return self.username
 
 
-class FavoriteUser(models.Model):
-    subscriber = models.ForeignKey(AppUser,
+class Subscribtion(models.Model):
+    subscriber = models.ForeignKey(User,
                                    on_delete=models.CASCADE,
                                    related_name='subscriber')
-    user = models.ForeignKey(AppUser,
+    user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              related_name='has_subs',)
 

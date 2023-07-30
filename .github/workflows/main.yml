@@ -78,7 +78,7 @@ jobs:
           # Выполняет pull образов с Docker Hub
           sudo docker compose -f docker-compose.production.yml pull
           # Перезапускает все контейнеры в Docker Compose
-          sudo docker compose -f docker-compose.production.yml down
+          
           sudo docker compose -f docker-compose.production.yml up -d
           sudo docker compose -f docker-compose.production.yml pull
           # Выполняет миграции и сбор статики

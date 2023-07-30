@@ -1,7 +1,11 @@
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
+
 from recipes.utils import slugify
-from users.models import AppUser
+from users.models import User
+
+User = get_user_model()
 
 
 class MeasurementUnit(models.Model):
@@ -18,7 +22,7 @@ class MeasurementUnit(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=100, unique=True, blank=False)
+    name = models.CharField(max_length=100, blank=False)
     measurement_unit = models.ForeignKey(
         MeasurementUnit,
         null=True,
@@ -72,14 +76,14 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag,
                                   through='TagRecipe',
                                   related_name='tags',)
-    author = models.ForeignKey(AppUser,
+    author = models.ForeignKey(User,
                                on_delete=models.DO_NOTHING,
                                null=False,
                                related_name='recipes',)
 
     ingredients = models.ManyToManyField(Ingredient,
                                          through='RecipeIngredient',
-                                         related_name='recipe_ingredients',)
+                                         related_name='recipe_ingredient',)
     name = models.CharField(max_length=200, blank=False, null=False,)
     image = models.ImageField(upload_to='recipes/images/',
                               null=True,
@@ -120,7 +124,7 @@ class TagRecipe(models.Model):
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe,
                                on_delete=models.CASCADE,
-                               related_name='recipe_ingredient',)
+                               related_name='recipe_ingredients',)
     ingredient = models.ForeignKey(Ingredient,
                                    on_delete=models.CASCADE,
                                    related_name='ingredient_recipe')
@@ -149,7 +153,7 @@ class RecipeIngredient(models.Model):
 
 
 class FavoriteRecipe(models.Model):
-    user = models.ForeignKey(AppUser,
+    user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              null=True, related_name='owner_recipe_favor',)
     recipe = models.ForeignKey(Recipe,
@@ -176,7 +180,7 @@ class FavoriteRecipe(models.Model):
 
 
 class ShoppingCart(models.Model):
-    byer = models.ForeignKey(AppUser,
+    byer = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              related_name='byer_recipe',)
     recipe = models.ForeignKey(Recipe,

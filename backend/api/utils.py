@@ -1,5 +1,8 @@
 import io
 
+from django.db.models import Sum
+
+from recipes.models import RecipeIngredient, ShoppingCart
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
@@ -18,7 +21,23 @@ pdfmetrics.registerFont(
 )
 
 
-def get_pdf(query):
+def get_query(user):
+    return RecipeIngredient.objects.filter(
+        recipe_id__in=ShoppingCart.objects.filter(
+            byer=user).values('recipe_id')
+    ).values(
+        'ingredient__name',
+        'ingredient__measurement_unit__unit',
+        'ingredient__measurement_unit__counted'
+    ).order_by(
+        'ingredient_id'
+    ).annotate(
+        total=Sum('amount')
+    )
+
+
+def get_pdf(user):
+    query = get_query(user)
     buffer = io.BytesIO()
     pdf = canvas.Canvas(buffer)
     pdf.setFont('beer-money12', 36)
