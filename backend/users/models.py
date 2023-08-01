@@ -18,12 +18,14 @@ class User(AbstractUser):
         blank=False,
         verbose_name="фамилия",
     )
-    favorites = models.ManyToManyField(Recipe, default=False, related_name="favorites")
+    favorites = models.ManyToManyField(
+        Recipe, blank=True, default=False, related_name="favorite_recipe"
+    )
     subscriptions = models.ManyToManyField(
-        "self", default=False, related_name="subscriptions"
+        "self", blank=True, default=False, related_name="subscriptions"
     )
     shopping_cart = models.ManyToManyField(
-        Recipe, default=False, related_name="shopping_cart"
+        Recipe, blank=True, default=False, related_name="shopping_cart"
     )
 
     def __str__(self):
