@@ -1,11 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Exists, OuterRef, Value
+from django.db.models import Count, Exists, OuterRef
 from django.http import FileResponse
 from django_filters import rest_framework as dj_filters
-
-from djoser.views import UserViewSet as ViewSet
-
-from rest_framework import filters
+from recipes.models import Ingredient, Recipe, Tag
+from rest_framework import filters, mixins
 from rest_framework import permissions as drf_permission
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -13,31 +11,31 @@ from rest_framework.response import Response
 
 from api.filters import RecipeFilterSet
 from api.pagination import Pagination
-from api.serializers import (FavoriteRecipeSerializer, IngredientSerializer,
-                             RecipeCreateUpdateSerializer, RecipeSerializer,
-                             SubscriptionsSerializer, TagSerializer,
-                             UserSerializer)
+from api.serializers import (
+    FavoriteRecipeSerializer,
+    IngredientSerializer,
+    RecipeCreateUpdateSerializer,
+    RecipeSerializer,
+    SubscriptionsSerializer,
+    TagSerializer,
+)
 from api.utils import get_pdf
-from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
-                            Tag)
-from users.models import Subscribtion
 
 User = get_user_model()
 
 
-class TagViewSet(viewsets.ModelViewSet):
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     permission_classes = (drf_permission.AllowAny,)
     serializer_class = TagSerializer
 
 
-class IngredientViewSet(viewsets.ModelViewSet):
-    queryset = Ingredient.objects.all().select_related(
-        'measurement_unit')
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (drf_permission.AllowAny,)
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('^name',)
+    search_fields = ("^name",)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -49,113 +47,75 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         queryset = Recipe.objects.select_related(
-            'author',
+            "author",
         ).prefetch_related(
-            'ingredients',
-            'tags',
-            'recipe_ingredients__ingredient',
-            'ingredients__measurement_unit',
-            'author__subscriber'
-        ).annotate(
-            is_favorited=Exists(
-                FavoriteRecipe.objects.filter(
-                    recipe_id=OuterRef('pk'),
-                    user=user.id)),
-            is_in_shopping_cart=Exists(
-                ShoppingCart.objects.filter(
-                    recipe_id=OuterRef('pk'),
-                    byer=user.id)),
-            is_subscribed=Exists(
-                Subscribtion.objects.filter(
-                    user_id=OuterRef('pk'),
-                    subscriber=user.id)),
+            "ingredients",
+            "tags",
         )
+        if user.is_authenticated:
+            queryset = queryset.annotate(
+                is_favorited=Exists(
+                    user.favorites.through.objects.filter(recipe_id=OuterRef("pk"))
+                ),
+                is_in_shopping_cart=Exists(
+                    user.shopping_cart.through.objects.filter(
+                        recipe_id=OuterRef("pk"),
+                    )
+                ),
+            )
         return queryset
 
-    @action(methods=('get', ),
-            detail=False,
-            permission_classes=(drf_permission.IsAuthenticated, ))
+    @action(
+        methods=("get",),
+        detail=False,
+        permission_classes=(drf_permission.IsAuthenticated,),
+    )
     def download_shopping_cart(self, request, *args, **kwargs):
         return FileResponse(
-            get_pdf(self.request.user),
-            as_attachment=True,
-            filename="shopping-list.pdf"
+            get_pdf(self.request.user), as_attachment=True, filename="shopping-list.pdf"
         )
 
     def get_serializer_class(self):
-        if self.action in ('update',
-                           'create',
-                           'partial_update',
-                           ):
+        if self.action in (
+            "update",
+            "create",
+            "partial_update",
+        ):
             return RecipeCreateUpdateSerializer
         return RecipeSerializer
 
 
-class FavoriteViewSet(viewsets.ModelViewSet):
-    lookup_fields = ('id',)
-    queryset = FavoriteRecipe.objects.all()
+class BaseFavoriteRecipeShopingCartViewSet(
+    mixins.CreateModelMixin, viewsets.GenericViewSet
+):
     permission_classes = (drf_permission.IsAuthenticated,)
+    attribyte = None
+    serializer_class = FavoriteRecipeSerializer
 
     def create(self, request, *args, **kwargs):
-        recipe = Recipe.objects.get(id=kwargs.pop('id'))
+        id = kwargs.pop("id")
+        recipe = Recipe.objects.get(id=id)
+        getattr(request.user, self.attribute).add(recipe)
         serializer = FavoriteRecipeSerializer(recipe)
-        FavoriteRecipe.objects.create(user=request.user, recipe=recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED,)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
 
-    @action(methods=['delete'], detail=False)
+    @action(methods=["delete"], detail=False)
     def delete(self, request, *args, **kwargs):
-        FavoriteRecipe.objects.filter(
-            user=request.user,
-            recipe_id=kwargs.pop('id')).delete()
+        id = kwargs.pop("id")
+        recipe = Recipe.objects.get(id=id)
+        getattr(request.user, self.attribute).remove(recipe)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class ShoppingCartViewSet(viewsets.ModelViewSet):
-    lookup_fields = ('id',)
-    queryset = ShoppingCart.objects.all()
-    permission_classes = (drf_permission.IsAuthenticated,)
-
-    def create(self, request, *args, **kwargs):
-        recipe = Recipe.objects.get(id=kwargs.pop('id'))
-        serializer = FavoriteRecipeSerializer(recipe)
-        ShoppingCart.objects.create(byer=request.user, recipe=recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED,)
-
-    @action(methods=['delete'], detail=False)
-    def delete(self, request, *args, **kwargs):
-        ShoppingCart.objects.filter(
-            byer=request.user,
-            recipe_id=kwargs.pop('id')).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class FavoriteViewSet(BaseFavoriteRecipeShopingCartViewSet):
+    attribute = "favorites"
 
 
-class UserViewSet(ViewSet):
-    pagination_class = Pagination
-    permission_classes = (drf_permission.IsAuthenticated, )
-    serializer_class = UserSerializer
-
-    def dispatch(self, request, *args, **kwargs):
-        self.pk = kwargs.get('id')
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_queryset(self):
-        if self.request.user.is_authenticated:
-            favorite_users_queryset = Subscribtion.objects.filter(
-                user=OuterRef('pk'),
-                subscriber=self.request.user)
-            users_queryset = User.objects.annotate(
-                is_subscribed=Exists(
-                    favorite_users_queryset))
-        elif self.pk:
-            users_queryset = User.objects.filter(
-                pk=self.pk).annotate(
-                    is_subscribed=Value(False))
-        return users_queryset
-
-    def get_permissions(self):
-        if self.action == 'retrieve':
-            self.permission_classes = (drf_permission.AllowAny, )
-        return super().get_permissions()
+class ShoppingCartViewSet(BaseFavoriteRecipeShopingCartViewSet):
+    attribute = "shopping_cart"
 
 
 class SubscriptionsViewSet(viewsets.ModelViewSet):
@@ -163,42 +123,31 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
     pagination_class = Pagination
     serializer_class = SubscriptionsSerializer
 
-    def get_queryset(self):
-        favorite_users_queryset = Subscribtion.objects.filter(
-            user=OuterRef('pk'),
-            subscriber=self.request.user)
-        users_queryset = User.objects.annotate(
-            is_subscribed=Exists(
-                favorite_users_queryset)).filter(
-                    is_subscribed=True)
-        users_queryset = users_queryset .annotate(
-            recipes_count=Count('recipes'))
-        return users_queryset
+    @action(detail=True)
+    def subscribe(self, request, id):
+        subscribed = User.objects.get(id=id)
+        request.user.subscriptions.add(subscribed)
+        subscribed.is_subscribed = True
+        serializer = SubscriptionsSerializer(subscribed)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
 
-
-class SubscribeViewSet(viewsets.ModelViewSet):
-    lookup_fields = ('id',)
-    permission_classes = (drf_permission.IsAuthenticated,)
-
-    def create(self, request, *args, **kwargs):
-        subscriber_id = request.user.pk
-        id = kwargs.pop('id')
-        user = User.objects.filter(id=id)
-        Subscribtion.objects.create(
-            user_id=id,
-            subscriber_id=subscriber_id)
-        favorite = Subscribtion.objects.filter(
-            user_id=id,
-            subscriber_id=subscriber_id)
-        user = user.annotate(is_subscribed=Exists(favorite)).get(id=id)
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED,)
-
-    @action(methods=['delete'], detail=False)
-    def delete(self, request, *args, **kwargs):
-        user_id = kwargs.pop('id')
-        subscriber_id = request.user.pk
-        Subscribtion.objects.filter(
-            user_id=user_id,
-            subscriber_id=subscriber_id).delete()
+    @action(detail=True)
+    def unsubscribe(self, request, id):
+        subscribed = User.objects.get(id=id)
+        request.user.subscriptions.remove(subscribed)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = User.objects.filter(subscriptions__id=user.id).annotate(
+            recipes_count=Count("recipes"),
+            is_subscribed=Exists(
+                user.subscriptions.through.objects.filter(
+                    from_user_id=OuterRef("id"),
+                )
+            ),
+        )
+        return queryset
