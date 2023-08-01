@@ -12,7 +12,9 @@ from api.views import (
 
 router = routers.DefaultRouter()
 
-router.register("recipes/(?P<id>[^/.]+)/favorite", FavoriteViewSet, basename="favorite")
+router.register(
+    "recipes/(?P<id>[^/.]+)/favorite", FavoriteViewSet, basename="favorite"
+)
 router.register(
     "recipes/(?P<id>[^/.]+)/shopping_cart",
     ShoppingCartViewSet,
@@ -27,7 +29,9 @@ subscribe_urls = [
     path("subscriptions/", SubscriptionsViewSet.as_view({"get": "list"})),
     path(
         "<int:id>/subscribe/",
-        SubscriptionsViewSet.as_view({"post": "subscribe", "delete": "unsubscribe"}),
+        SubscriptionsViewSet.as_view(
+            {"post": "subscribe", "delete": "unsubscribe"}
+        ),
     ),
 ]
 

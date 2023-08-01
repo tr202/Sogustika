@@ -6,9 +6,13 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
-pdfmetrics.registerFont(TTFont("beer-money12", "recipes/fonts/beer-money12.ttf"))
 pdfmetrics.registerFont(
-    TTFont("dewberry-bold-italic.ttf", "recipes/fonts/dewberry-bold-italic.ttf")
+    TTFont("beer-money12", "recipes/fonts/beer-money12.ttf")
+)
+pdfmetrics.registerFont(
+    TTFont(
+        "dewberry-bold-italic.ttf", "recipes/fonts/dewberry-bold-italic.ttf"
+    )
 )
 
 
@@ -17,7 +21,9 @@ def get_query(user):
         recipe_id__in=user.shopping_cart.values("id")
     )
     return (
-        recipe_ingredient_set.values("ingredient__name", "ingredient__measurement_unit")
+        recipe_ingredient_set.values(
+            "ingredient__name", "ingredient__measurement_unit"
+        )
         .order_by("ingredient_id")
         .annotate(total=Sum("amount"))
     )

@@ -50,7 +50,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if user.is_authenticated:
             queryset = queryset.annotate(
                 is_favorited=Exists(
-                    user.favorites.through.objects.filter(recipe_id=OuterRef("pk"))
+                    user.favorites.through.objects.filter(
+                        recipe_id=OuterRef("pk")
+                    )
                 ),
                 is_in_shopping_cart=Exists(
                     user.shopping_cart.through.objects.filter(
@@ -73,7 +75,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request, *args, **kwargs):
         return FileResponse(
-            get_pdf(self.request.user), as_attachment=True, filename="shopping-list.pdf"
+            get_pdf(self.request.user),
+            as_attachment=True,
+            filename="shopping-list.pdf",
         )
 
     def get_serializer_class(self):
