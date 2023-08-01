@@ -3,7 +3,7 @@ import base64
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import transaction
-from djoser.serializers import UserSerializer, UserCreateSerializer
+from djoser.serializers import UserSerializer
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
 
@@ -71,7 +71,9 @@ class UserSerializer(UserSerializer):
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="ingredient_id")
     name = serializers.CharField(source="ingredient.name")
-    measurement_unit = serializers.CharField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.CharField(
+        source="ingredient.measurement_unit"
+    )
 
     class Meta:
         model = RecipeIngredient
@@ -86,7 +88,9 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer()
     image = serializers.ImageField()
-    ingredients = RecipeIngredientSerializer(source="recipe_ingredients", many=True)
+    ingredients = RecipeIngredientSerializer(
+        source="recipe_ingredients", many=True
+    )
     tags = TagSerializer(many=True)
     is_favorited = serializers.BooleanField(
         default=False,
