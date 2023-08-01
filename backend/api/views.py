@@ -46,12 +46,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Recipe.objects.select_related(
-            "author",
-        ).prefetch_related(
-            "ingredients",
-            "tags",
-        )
+        queryset = Recipe.objects.all()
         if user.is_authenticated:
             queryset = queryset.annotate(
                 is_favorited=Exists(
@@ -63,6 +58,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     )
                 ),
             )
+        queryset = queryset.select_related(
+            "author",
+        ).prefetch_related(
+            "ingredients",
+            "tags",
+        )
         return queryset
 
     @action(
@@ -94,6 +95,7 @@ class BaseFavoriteRecipeShopingCartViewSet(
 
     def create(self, request, *args, **kwargs):
         id = kwargs.pop("id")
+        print("dfgsdfgsdgfgsdgfsdgsdfgsdgdgdgdfgsdgdsfgdsgdfg")
         recipe = Recipe.objects.get(id=id)
         getattr(request.user, self.attribute).add(recipe)
         serializer = FavoriteRecipeSerializer(recipe)

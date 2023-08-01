@@ -3,7 +3,7 @@ import base64
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import transaction
-from djoser.serializers import UserSerializer
+from djoser.serializers import UserSerializer, UserCreateSerializer
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
 
@@ -52,11 +52,9 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(UserSerializer):
-    is_subscribed = serializers.SerializerMethodField(default=False)
-
-    def get_is_subscribed(self, obj):
-        user = self.context["request"].user
-        return user.is_authenticated and obj.subscriptions.filter(id=user.id).exists()
+    is_subscribed = serializers.ReadOnlyField(
+        default=False, source="subscriptions__filter__id__in__user_id__exists"
+    )
 
     class Meta:
         model = User
@@ -90,7 +88,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     image = serializers.ImageField()
     ingredients = RecipeIngredientSerializer(source="recipe_ingredients", many=True)
     tags = TagSerializer(many=True)
-    is_favorited = serializers.BooleanField(default=False)
+    is_favorited = serializers.BooleanField(
+        default=False,
+    )
     is_in_shopping_cart = serializers.BooleanField(default=False)
 
     class Meta:
@@ -190,7 +190,7 @@ class UserRecipeSerializer(serializers.ModelSerializer):
 
 class SubscriptionsSerializer(UserSerializer):
     recipes = UserRecipeSerializer(read_only=True, many=True)
-    is_subscribed = serializers.BooleanField()
+    is_subscribed = serializers.BooleanField(default=False)
     recipes_count = serializers.SerializerMethodField()
 
     def get_recipes_count(self, obj):

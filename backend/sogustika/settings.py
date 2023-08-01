@@ -80,7 +80,6 @@ DATABASES = {
 }
 
 
-"""
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -95,7 +94,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-"""
+
 
 LANGUAGE_CODE = "ru-ru"
 
@@ -133,8 +132,5 @@ DJOSER = {
     },
     "HIDE_USERS": False,
     "LOGIN_FIELD": "email",
-    "SERIALIZERS": {
-        "user": "api.serializers.UserSerializer",
-        "user_create": "api.serializers.UserSerializer",
-    },
+    "USER_ID_FIELD": "username",
 }
