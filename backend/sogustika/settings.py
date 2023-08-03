@@ -110,7 +110,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "collected_static"
 MEDIA_URL = "/media/"
-MEDIA_ROOT = config("MEDIA_ROOT")
+MEDIA_ROOT = config("MEDIA_ROOT", default=BASE_DIR / "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -122,15 +122,20 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
     ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
 }
 
 DJOSER = {
     "PASSWORD_RESET_CONFIRM_URL": "api/users/password/reset/confirm/{uid}/{token}",
     "PERMISSIONS": {
         "user_list": ["rest_framework.permissions.IsAuthenticated"],
-        "user": ["rest_framework.permissions.AllowAny"],
+        "user": ["api.permissions.IsAuthenticated"],
     },
     "HIDE_USERS": False,
     "LOGIN_FIELD": "email",
-    "USER_ID_FIELD": "username",
+    "SERIALIZERS": {
+        "current_user": "api.serializers.UserSerializer",
+        "user": "api.serializers.UserSerializer",
+    },
 }

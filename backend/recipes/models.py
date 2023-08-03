@@ -41,10 +41,9 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag)
     author = models.ForeignKey(
         "users.User",
-        on_delete=models.DO_NOTHING,
+        on_delete=models.CASCADE,
         related_name="recipes",
     )
-
     ingredients = models.ManyToManyField(
         Ingredient,
         through="RecipeIngredient",
