@@ -1,14 +1,3 @@
-from django.contrib.auth import get_user_model
-from django.db.models import Count, Exists, OuterRef
-from django.http import FileResponse
-from django_filters import rest_framework as dj_filters
-from recipes.models import Ingredient, Recipe, Tag
-from rest_framework import filters, mixins
-from rest_framework import permissions as drf_permission
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.response import Response
-
 from api.filters import RecipeFilterSet
 from api.pagination import Pagination
 from api.serializers import (
@@ -20,17 +9,29 @@ from api.serializers import (
     TagSerializer,
 )
 from api.utils import get_pdf
+from django.contrib.auth import get_user_model
+from django.db.models import Count, Exists, OuterRef
+from django.http import FileResponse
+from django_filters import rest_framework as dj_filters
+from recipes.models import Ingredient, Recipe, Tag
+from rest_framework import filters, mixins
+from rest_framework import permissions as drf_permission
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 User = get_user_model()
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    pagination_class = None
     queryset = Tag.objects.all()
     permission_classes = (drf_permission.AllowAny,)
     serializer_class = TagSerializer
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    pagination_class = None
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (drf_permission.AllowAny,)
@@ -51,7 +52,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             queryset = queryset.annotate(
                 is_favorited=Exists(
                     user.favorites.through.objects.filter(
-                        recipe_id=OuterRef("pk")
+                        recipe_id=OuterRef("id")
                     )
                 ),
                 is_in_shopping_cart=Exists(
@@ -94,12 +95,10 @@ class BaseFavoriteRecipeShopingCartViewSet(
     mixins.CreateModelMixin, viewsets.GenericViewSet
 ):
     permission_classes = (drf_permission.IsAuthenticated,)
-    attribyte = None
     serializer_class = FavoriteRecipeSerializer
 
     def create(self, request, *args, **kwargs):
         id = kwargs.pop("id")
-        print("dfgsdfgsdgfgsdgfsdgsdfgsdgdgdgdfgsdgdsfgdsgdfg")
         recipe = Recipe.objects.get(id=id)
         getattr(request.user, self.attribute).add(recipe)
         serializer = FavoriteRecipeSerializer(recipe)

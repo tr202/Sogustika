@@ -1,6 +1,3 @@
-from django.urls import include, path
-from rest_framework import routers
-
 from api.views import (
     FavoriteViewSet,
     IngredientViewSet,
@@ -9,6 +6,8 @@ from api.views import (
     SubscriptionsViewSet,
     TagViewSet,
 )
+from django.urls import include, path
+from rest_framework import routers
 
 router = routers.DefaultRouter()
 
@@ -20,9 +19,7 @@ router.register(
     ShoppingCartViewSet,
     basename="shopping_cart",
 )
-
 router.register("recipes", RecipeViewSet, basename="recipes")
-
 router.register("ingredients", IngredientViewSet, basename="ingredients")
 router.register("tags", TagViewSet, basename="tags")
 subscribe_urls = [

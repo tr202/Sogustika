@@ -3,7 +3,7 @@ import base64
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import transaction
-from djoser.serializers import UserSerializer
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
 
@@ -51,19 +51,22 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
         )
 
 
-class UserSerializer(UserSerializer):
+class UserSerializer(UserSerializer, UserCreateSerializer):
     is_subscribed = serializers.ReadOnlyField(
         default=False, source="subscriptions__filter__id__in__user_id__exists"
     )
 
     class Meta:
         model = User
-        fields = (
+        short_fields = (
             "email",
-            "id",
             "username",
             "first_name",
             "last_name",
+        )
+        UserCreateSerializer.Meta.fields += short_fields
+        fields = short_fields + (
+            "id",
             "is_subscribed",
         )
 
