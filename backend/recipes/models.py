@@ -60,6 +60,15 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField()
 
     class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(cooking_time__gte=1),
+                name="Cooking time most be more than zero",
+            ),
+            models.UniqueConstraint(
+                name="No doule recipe name", fields=["author", "name"]
+            ),
+        ]
         verbose_name_plural = "рецепты"
         verbose_name = "рецепт"
         ordering = ("-pub_date",)
@@ -89,6 +98,15 @@ class RecipeIngredient(models.Model):
     amount = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(amount__gte=1),
+                name="Amount most be more than zero",
+            ),
+            models.UniqueConstraint(
+                name="no_double_ingredient", fields=["recipe", "ingredient"]
+            ),
+        ]
         ordering = ("recipe",)
 
     def __str__(self):

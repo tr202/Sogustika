@@ -47,26 +47,30 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Recipe.objects.all()
+        queryset = (
+            Recipe.objects.all()
+            .select_related(
+                "author",
+            )
+            .prefetch_related(
+                "ingredients",
+                "tags",
+            )
+        )
+
         if user.is_authenticated:
+            favorites = user.favorites.values("name")
+            shoping_cart = user.shopping_cart.values("name")
+            subscribes = user.subscriptions.values("username")
             queryset = queryset.annotate(
-                is_favorited=Exists(
-                    user.favorites.through.objects.filter(
-                        recipe_id=OuterRef("id")
-                    )
+                is_subscribed=Exists(
+                    subscribes.filter(username=OuterRef("author__username"))
                 ),
+                is_favorited=Exists(favorites.filter(name=OuterRef("name"))),
                 is_in_shopping_cart=Exists(
-                    user.shopping_cart.through.objects.filter(
-                        recipe_id=OuterRef("pk"),
-                    )
+                    shoping_cart.filter(name=OuterRef("name"))
                 ),
             )
-        queryset = queryset.select_related(
-            "author",
-        ).prefetch_related(
-            "ingredients",
-            "tags",
-        )
         return queryset
 
     @action(
