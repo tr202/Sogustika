@@ -12,7 +12,6 @@ User = get_user_model()
 
 class TagSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
-        print(data)
         return data
 
     class Meta:
@@ -52,9 +51,7 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(UserSerializer, UserCreateSerializer):
-    is_subscribed = serializers.ReadOnlyField(
-        default=False, source="subscriptions__filter__id__in__user_id__exists"
-    )
+    is_subscribed = serializers.ReadOnlyField(default=False)
 
     class Meta:
         model = User
@@ -89,7 +86,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    author = UserSerializer()
+    author = serializers.SerializerMethodField()
     image = serializers.ImageField()
     ingredients = RecipeIngredientSerializer(
         source="recipe_ingredients", many=True
@@ -99,6 +96,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         default=False,
     )
     is_in_shopping_cart = serializers.BooleanField(default=False)
+
+    def get_author(self, obj):
+        serialiser = UserSerializer()
+        obj.author.is_subscribed = obj.is_subscribed
+        return serialiser.to_representation(obj.author)
 
     class Meta:
         model = Recipe
@@ -170,6 +172,39 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         instance.tags.set(tags)
         self.set_ingredients(ingredients, instance)
         return instance
+
+    def validate(self, data):
+        errors = {}
+        if data.get("cooking_time") <= 0:
+            errors[
+                "cooking_time"
+            ] = "Время приготовления должно быть больше нуля"
+        ingredients = data.get("ingredients")
+
+        ids_ingredients = list(
+            map(lambda x: x.get("ingredient_id"), ingredients)
+        )
+        ingredients_error_list = []
+        if len(ids_ingredients) > len(set(ids_ingredients)):
+            ingredients_error_list.append("Ингредиенты не должны повторяться")
+        for ingredient in ingredients:
+            if int(ingredient.get("amount")) <= 0:
+                ingredients_error_list.append(
+                    {
+                        Ingredient.objects.get(
+                            id=ingredient.get("ingredient_id")
+                        ).name: "Количество должно быть больше нуля"
+                    }
+                )
+        if len(ingredients_error_list) > 0:
+            errors["ingredients"] = ingredients_error_list
+        if len(data.get("tags")) <= 0:
+            errors["tags"] = "Теги обязательны\n"
+        if errors:
+            js = str(errors)
+            print(js)
+            raise serializers.ValidationError(js)
+        return data
 
     class Meta:
         model = Recipe
