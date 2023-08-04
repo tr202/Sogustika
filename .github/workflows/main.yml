@@ -25,6 +25,6 @@ jobs:
         script: |
           cd sogustika
           sudo docker compose -f docker-compose.production.yml down
-          sudo docker system prune
+          sudo docker system prune -y
           sudo reboot
           
