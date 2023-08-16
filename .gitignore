@@ -1,3 +1,18 @@
+*fixtures.json
+data/recipes/images/
+* copy.*
+*copy.*
+*back.conf
+*load_csv_data.py
+*import_csv.py
+*temp-copy*
+*copy.yml
+backup/
+*.copy.py
+* copy.py
+static/
+media/
+collected_static/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
