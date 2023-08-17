@@ -32,21 +32,19 @@ Sogustika социальная сеть гурманов.
 ###### DB_PORT=5432
 ###### SECRET_KEY=Your-secret-key
 ###### ALLOWED_HOSTS=localhost
-- Перейдите в эту папку и выполните следующие команды 
+- Выполните следующие комманды из данной папки
+- sudo docker compose -f docker-compose.production.yml pull 
 - sudo docker compose -f docker-compose.production.yml up -d
 - sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
 - sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
 - sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /static/static
 - sudo docker compose -f docker-compose.production.yml exec backend python manage.py load_data
-- отредактируйте nginx.conf в соответствии с Вашим доменным именем
-- Проект требует наличия SSL сертификатов для работы
-- Получите и скопируйте SSL сертификаты в папки назначения
-- ssl_certificate /etc/nginx/ssl/live/Ваш_домен/fullchain.pem;
-- ssl_certificate_key /etc/nginx/ssl/live/Ваш_домен/privkey.pem;
 
-# Для разработки можно 
-## CI/CD
-- Github Actions
+## Для разработки дополнительно настройте Github Actions
+- Отредактируйте файл main.yml в соответствии с вашим аккаунтом на dockerhub
+- Добавьте ключи сервера в секреты репозитория
+- Сделайте коммит в ветку deploy
+- Теперь развертывание новых версий будет происходить автоматически при коммите в ветку deploy
 
 ## Production
 Kostya https://github.com/tr202
