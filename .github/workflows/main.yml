@@ -75,7 +75,6 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         script: |
           cd sogustika
-          # Выполняет pull образов с Docker Hub
           sudo docker compose -f docker-compose.production.yml pull 
           sudo docker compose -f docker-compose.production.yml up -d
           sudo docker compose -f docker-compose.production.yml pull
