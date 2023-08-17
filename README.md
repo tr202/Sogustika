@@ -24,14 +24,14 @@ Sogustika социальная сеть гурманов.
 - ssl_certificate_key /etc/nginx/ssl/live/Ваш_домен/privkey.pem;
 - В домашней директории сервера создайте папку sogustika
 - Разместите в ней файл .env следующего содержания (все переменные должны быть заменены на Ваши)
-#### POSTGRES_USER=django_user
-#### POSTGRES_PASSWORD=django
-#### POSTGRES_DB=django
-#### DB=postgres
-#### DB_HOST=db
-#### DB_PORT=5432
-#### SECRET_KEY=Your-secret-key
-#### ALLOWED_HOSTS=localhost
+###### POSTGRES_USER=django_user
+###### POSTGRES_PASSWORD=django
+###### POSTGRES_DB=django
+###### DB=postgres
+###### DB_HOST=db
+###### DB_PORT=5432
+###### SECRET_KEY=Your-secret-key
+###### ALLOWED_HOSTS=localhost
 - Перейдите в эту папку и выполните следующие команды 
 - sudo docker compose -f docker-compose.production.yml up -d
 - sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
