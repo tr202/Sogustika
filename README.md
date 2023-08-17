@@ -27,8 +27,8 @@ Sogustika социальная сеть гурманов.
 - отредактируйте nginx.conf в соответствии с Вашим доменным именем
 - Проект требует наличия SSL сертификатов для работы
 - Получите и скопируйте SSL сертификаты в папки назначения
-ssl_certificate /etc/nginx/ssl/live/Ваш_домен/fullchain.pem;
-ssl_certificate_key /etc/nginx/ssl/live/Ваш_домен/privkey.pem;
+- ssl_certificate /etc/nginx/ssl/live/Ваш_домен/fullchain.pem;
+- ssl_certificate_key /etc/nginx/ssl/live/Ваш_домен/privkey.pem;
    
 
 ## CI/CD
