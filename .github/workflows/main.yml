@@ -3,9 +3,7 @@ name: Main Sogustika workflow
 on:
   push:
     branches:
-      #- main
-      - tests
-      #- develop
+      - deploy
 
 jobs:
 
